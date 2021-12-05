@@ -5,7 +5,10 @@ const express = require('express');
 const router = new express.Router();
 const User = require('../models/user');
 const auth = require('../middleware/auth');
-const { requestErrorHandler } = require('../utils/common-utils');
+const {
+  requestErrorHandler,
+  filesUploadErrorHandler
+} = require('../utils/common-utils');
 const multer = require('multer');
 
 // User sign up
@@ -50,6 +53,27 @@ router.get('/users/me', auth, async (req, res) => {
   res.send(req.user);
 });
 
+
+// PATCH user
+router.patch('/users/me', auth, async (req, res) => {
+  const patchProps = Object.keys(req.body);
+  const userProps = ['name', 'password', 'email', 'age'];
+  const isAvailableUpdate = patchProps.every(prop => userProps.includes(prop));
+
+  if (!isAvailableUpdate) {
+    return res.status(400).send({error: 'Invalid updates!'});
+  }
+
+  try {
+    patchProps.forEach(prop => req.user[prop] = req.body[prop]);
+    await req.user.save();
+
+    res.send(req.user);
+  } catch (err) {
+    requestErrorHandler(res, err);
+  }
+});
+
 // Upload avatar
 const upload = multer({
   dest: 'images/avatars',
@@ -64,8 +88,19 @@ const upload = multer({
     callback(undefined, true);
   }
 });
+
 router.post('/users/me/avatar', upload.single('avatar'), (req, res) => {
   res.send();
+}, filesUploadErrorHandler);
+
+// DELETE user
+router.delete('/users/me', auth, async (req, res) => {
+  try {
+    req.user.remove();
+    res.send(req.user);
+  } catch (err) {
+    requestErrorHandler(res, err);
+  }
 });
 
 // User logout
@@ -89,36 +124,6 @@ router.post('/users/logoutAll', auth, async (req, res) => {
     await req.user.save();
 
     res.send({ status: 'User is logged out from all the sessions!' });
-  } catch (err) {
-    requestErrorHandler(res, err);
-  }
-});
-
-// PATCH user
-router.patch('/users/me', auth, async (req, res) => {
-  const patchProps = Object.keys(req.body);
-  const userProps = ['name', 'password', 'email', 'age'];
-  const isAvailableUpdate = patchProps.every(prop => userProps.includes(prop));
-
-  if (!isAvailableUpdate) {
-    return res.status(400).send({error: 'Invalid updates!'});
-  }
-
-  try {
-    patchProps.forEach(prop => req.user[prop] = req.body[prop]);
-    await req.user.save();
-
-    res.send(req.user);
-  } catch (err) {
-    requestErrorHandler(res, err);
-  }
-});
-
-// DELETE user
-router.delete('/users/me', auth, async (req, res) => {
-  try {
-    req.user.remove();
-    res.send(req.user);
   } catch (err) {
     requestErrorHandler(res, err);
   }

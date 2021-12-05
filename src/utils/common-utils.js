@@ -10,6 +10,17 @@ const requestErrorHandler = (res, err) => {
 };
 
 /**
+ * Upload file error handler method
+ * @param err
+ * @param req
+ * @param res
+ * @param next
+ */
+const filesUploadErrorHandler = (err, req, res, next) => {
+  res.status(400).send({ error: err.message });
+};
+
+/**
  * Method for getting encryption password
  * @param password
  * @param salt
@@ -63,6 +74,7 @@ const getStructuredResponse = (items) => {
 
 module.exports = {
   requestErrorHandler,
+  filesUploadErrorHandler,
   getHashPassword,
   matchPassword,
   getStructuredResponse
