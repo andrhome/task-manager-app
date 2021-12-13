@@ -3,6 +3,7 @@
  */
 const express = require('express');
 const router = new express.Router();
+const sharp = require('sharp');
 const User = require('../models/user');
 const auth = require('../middleware/auth');
 const {
@@ -90,20 +91,14 @@ const upload = multer({
 
 // Upload user avatar
 router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) => {
-  req.user.avatar = req.file.buffer;
+  req.user.avatar = await sharp(req.file.buffer)
+    .resize({ width: 250, height: 250 })
+    .png()
+    .toBuffer();
+
   await req.user.save();
   res.send();
 }, filesUploadErrorHandler);
-
-// DELETE user
-router.delete('/users/me', auth, async (req, res) => {
-  try {
-    req.user.remove();
-    res.send(req.user);
-  } catch (err) {
-    requestErrorHandler(res, err);
-  }
-});
 
 // Delete user avatar
 router.patch('/users/me/avatar', auth, async (req, res) => {
@@ -121,8 +116,18 @@ router.get('/users/:id/avatar', async (req, res) => {
       throw new Error();
     }
 
-    res.set('Content-Type', 'image/jpg');
+    res.set('Content-Type', 'image/png');
     res.send(user.avatar);
+  } catch (err) {
+    requestErrorHandler(res, err);
+  }
+});
+
+// DELETE user
+router.delete('/users/me', auth, async (req, res) => {
+  try {
+    req.user.remove();
+    res.send(req.user);
   } catch (err) {
     requestErrorHandler(res, err);
   }
