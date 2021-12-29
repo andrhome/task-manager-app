@@ -11,6 +11,7 @@ const {
   filesUploadErrorHandler
 } = require('../utils/common-utils');
 const multer = require('multer');
+const { sendWelcomeEmail } = require('../emails/account');
 
 // User sign up
 router.post('/users', async (req, res) => {
@@ -24,10 +25,12 @@ router.post('/users', async (req, res) => {
     }
 
     await user.save();
+    // "sendWelcomeEmail" method doesn't work because I couldn't Sign Up to the SendGrid service
+    // sendWelcomeEmail(user.email, user.name);
+
     const token = await user.generateAuthToken();
 
-    res.status(201);
-    res.send({ user, token });
+    res.status(201).send({ user, token });
   } catch (err) {
     requestErrorHandler(res, err);
   }

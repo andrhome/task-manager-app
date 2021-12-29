@@ -10,7 +10,7 @@ const {
   matchPassword
 } = require('../utils/common-utils');
 
-const SECRET_KEY = 'thisismysecretkey';
+const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
