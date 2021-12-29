@@ -1,0 +1,17 @@
+{
+  "environments": {
+    "test": {
+      "formation": {
+        "test": {
+          "quantity": 1,
+          "size": "standard-1x"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "test": "node src/index.js",
+    "start": "node src/index.js",
+    "dev": "env-cmd nodemon src/index.js"
+  }
+}
