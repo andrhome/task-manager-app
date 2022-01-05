@@ -27,24 +27,44 @@ afterEach(async () => {
 });
 
 test('Should signup a new user', async () => {
-  await request(app)
+  const passwordMock = 'john12345';
+  const response = await request(app)
     .post('/users')
     .send({
       name: 'John',
       email: 'john@test.com',
-      password: 'john12345'
-    })
-    .expect(201);
+      password: passwordMock
+    });
+
+  expect(response.statusCode).toEqual(201);
+
+  const user = await User.findById(response.body.user._id);
+
+  expect(user).not.toBeNull();
+  expect(response.body).toMatchObject({
+    user: {
+      name: 'John',
+      email: 'john@test.com',
+    },
+    token: user.tokens[0].token
+  });
+  expect(user.password).not.toEqual(passwordMock);
 });
 
 test('Should login existing user', async () => {
-  await request(app)
+  const response = await request(app)
     .post('/users/login')
     .send({
       email: testUser.email,
       password: testUser.password
-    })
-    .expect(200)
+    });
+
+  expect(response.statusCode).toEqual(200);
+
+  const user = await User.findById(testUser._id);
+
+  // Check the second token matching
+  expect(response.body.token).toEqual(user.tokens[1].token);
 });
 
 test('Should not login nonexistent user', async () => {
