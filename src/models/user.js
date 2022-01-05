@@ -6,11 +6,11 @@ const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const Task = require('./task');
 const {
+  getJwtSecretKey,
   getHashPassword,
   matchPassword
 } = require('../utils/common-utils');
 
-const SECRET_KEY = process.env.JWT_SECRET_KEY;
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -83,15 +83,13 @@ userSchema.methods.generateAuthToken = async function () {
   const user = this;
   const token = jwt.sign(
     { _id: user._id.toString() },
-    SECRET_KEY
+    getJwtSecretKey()
   );
   user.tokens = user.tokens.concat({ token })
   await user.save();
 
   return token;
 };
-
-userSchema.statics.getSecretKey = () => SECRET_KEY;
 
 userSchema.statics.findByCredentials = async (email, password) => {
   const user = await User.findOne({ email });

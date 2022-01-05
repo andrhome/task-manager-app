@@ -1,11 +1,21 @@
 const request = require('supertest');
 const app = require('../src/app');
 const User = require('../src/models/user');
+const jwt = require('jsonwebtoken');
+const {
+  generateObjectId,
+  getJwtSecretKey
+} = require('../src/utils/common-utils');
 
+const userId = generateObjectId();
 const testUser = {
+  _id: userId,
   name: 'Bob',
   email: 'bob@test.com',
-  password: '12345678!'
+  password: '12345678!',
+  tokens: [{
+    token: jwt.sign({ _id: userId }, getJwtSecretKey())
+  }]
 };
 
 beforeEach(async () => {

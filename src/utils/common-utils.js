@@ -1,4 +1,19 @@
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
+
+/**
+ * Method for getting an object id
+ */
+const generateObjectId = () => {
+  return new mongoose.Types.ObjectId();
+};
+
+/**
+ * Method for getting JWT_SECRET_KEY from the environment
+ */
+const getJwtSecretKey = () => {
+  return process.env.JWT_SECRET_KEY;
+};
 
 /**
  * Error handler method
@@ -73,6 +88,8 @@ const getStructuredResponse = (items) => {
 };
 
 module.exports = {
+  generateObjectId,
+  getJwtSecretKey,
   requestErrorHandler,
   filesUploadErrorHandler,
   getHashPassword,

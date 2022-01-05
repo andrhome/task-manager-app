@@ -1,11 +1,11 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const { getJwtSecretKey } = require('../utils/common-utils');
 
 const auth = async (req, res, next) => {
   try {
     const token = req.header('Authorization').replace('Bearer ', '');
-    const secretKey = User.getSecretKey();
-    const decode = jwt.verify(token, secretKey);
+    const decode = jwt.verify(token, getJwtSecretKey());
     const user = await User.findOne({ _id: decode._id, 'tokens.token': token });
 
     if (!user) {
