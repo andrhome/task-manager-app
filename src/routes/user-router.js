@@ -78,6 +78,16 @@ router.patch('/users/me', auth, async (req, res) => {
   }
 });
 
+// DELETE user
+router.delete('/users/me', auth, async (req, res) => {
+  try {
+    req.user.remove();
+    res.send(req.user);
+  } catch (err) {
+    requestErrorHandler(res, err);
+  }
+});
+
 // Upload avatar
 const upload = multer({
   limits: {
@@ -121,16 +131,6 @@ router.get('/users/:id/avatar', async (req, res) => {
 
     res.set('Content-Type', 'image/png');
     res.send(user.avatar);
-  } catch (err) {
-    requestErrorHandler(res, err);
-  }
-});
-
-// DELETE user
-router.delete('/users/me', auth, async (req, res) => {
-  try {
-    req.user.remove();
-    res.send(req.user);
   } catch (err) {
     requestErrorHandler(res, err);
   }
