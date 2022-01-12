@@ -1,3 +1,5 @@
+jest.setTimeout(30000);
+
 const request = require('supertest');
 const app = require('../src/app');
 const User = require('../src/models/user');
@@ -82,14 +84,14 @@ test('Should get profile for the user', async () => {
     .get('/users/me')
     .set('Authorization', `Bearer ${testUser.tokens[0].token}`)
     .send()
-    .expect(200)
+    .expect(200);
 });
 
 test('Should not get profile for unauthenticated user', async () => {
   await request(app)
     .get('/users/me')
     .send()
-    .expect(401)
+    .expect(401);
 });
 
 test('Should delete the user account', async () => {
@@ -108,5 +110,38 @@ test('Should not delete an account of unauthenticated user', async () => {
   await request(app)
     .delete('/users/me')
     .send()
-    .expect(401)
+    .expect(401);
+});
+
+test('Should upload an avatar image', async () => {
+  await request(app)
+    .post('/users/me/avatar')
+    .set('Authorization', `Bearer ${testUser.tokens[0].token}`)
+    .attach('avatar', 'tests/fixtures/test-img.jpg')
+    .expect(200)
+
+  const user = await User.findById(userId);
+
+  expect(user.avatar).toEqual(expect.any(Buffer))
+});
+
+test('Should update valid user fields', async () => {
+  const nameMock = 'Mike';
+  await request(app)
+    .patch('/users/me')
+    .set('Authorization', `Bearer ${testUser.tokens[0].token}`)
+    .send({ name: nameMock })
+    .expect(200);
+
+  const user = await User.findById(userId);
+
+  expect(user.name).toEqual(nameMock);
+});
+
+test('Should not update invalid user fields', async () => {
+  await request(app)
+    .patch('/users/me')
+    .set('Authorization', `Bearer ${testUser.tokens[0].token}`)
+    .send({ location: null })
+    .expect(400);
 });
